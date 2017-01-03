@@ -3,7 +3,7 @@ package com.sherpa.examples.sparkdemo
 import org.apache.spark.sql.SparkSession
 
 /**
-  * Created by madhu on 6/5/16.
+  * Created by Ashish.Nagdev
   */
 object DataSetWordCount {
 
