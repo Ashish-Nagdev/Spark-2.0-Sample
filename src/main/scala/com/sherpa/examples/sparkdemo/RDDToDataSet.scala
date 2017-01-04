@@ -4,16 +4,16 @@ import org.apache.spark.sql.types.{DoubleType, StringType, StructField, StructTy
 import org.apache.spark.sql.{Row, SparkSession}
 
 /**
-  * Created by Ashish.Nagdev
+  * Created by Ashish Nagdev
   * RDD API to Dataset API
   */
 object RDDToDataSet {
 
   def main(args: Array[String]) {
 
-    val sparkSession = SparkSession.builder.
-      master("local")
-      .appName("example")
+    val sparkSession = SparkSession.builder
+      .master("local")
+      .appName("RDDTODATASET")
       .getOrCreate()
 
     val sparkContext = sparkSession.sparkContext
@@ -31,8 +31,8 @@ object RDDToDataSet {
     println(" wordcount ")
 
     val wordsRDD = rdd.flatMap(value => value.split("\\s+"))
-    val wordsPair = wordsRDD.map(word => (word,1))
-    val wordCount = wordsPair.reduceByKey(_+_)
+    val wordsPair = wordsRDD.map(word => (word, 1))
+    val wordCount = wordsPair.reduceByKey(_ + _)
     println(wordCount.collect.toList)
 
     import sparkSession.implicits._
@@ -47,10 +47,10 @@ object RDDToDataSet {
 
     //filter
 
-    val filteredRDD = wordsRDD.filter(value => value =="hello")
+    val filteredRDD = wordsRDD.filter(value => value == "hello")
     println(filteredRDD.collect().toList)
 
-    val filteredDS = wordsDs.filter(value => value =="hello")
+    val filteredDS = wordsDs.filter(value => value == "hello")
     filteredDS.show()
 
 
@@ -67,40 +67,40 @@ object RDDToDataSet {
     println(dsToRDD.collect())
 
     val rddStringToRowRDD = rdd.map(value => Row(value))
-    val dfschema = StructType(Array(StructField("value",StringType)))
-    val rddToDF = sparkSession.createDataFrame(rddStringToRowRDD,dfschema)
+    val dfschema = StructType(Array(StructField("value", StringType)))
+    val rddToDF = sparkSession.createDataFrame(rddStringToRowRDD, dfschema)
     val rDDToDataSet = rddToDF.as[String]
     rDDToDataSet.show()
 
     // double based operation
 
-    val doubleRDD = sparkContext.makeRDD(List(1.0,5.0,8.9,9.0))
-    val rddSum =doubleRDD.sum()
+    val doubleRDD = sparkContext.makeRDD(List(1.0, 5.0, 8.9, 9.0))
+    val rddSum = doubleRDD.sum()
     val rddMean = doubleRDD.mean()
 
     println(s"sum is $rddSum")
     println(s"mean is $rddMean")
 
     val rowRDD = doubleRDD.map(value => Row.fromSeq(List(value)))
-    val schema = StructType(Array(StructField("value",DoubleType)))
-    val doubleDS = sparkSession.createDataFrame(rowRDD,schema)
+    val schema = StructType(Array(StructField("value", DoubleType)))
+    val doubleDS = sparkSession.createDataFrame(rowRDD, schema)
 
     import org.apache.spark.sql.functions._
     doubleDS.agg(sum("value")).show()
     doubleDS.agg(mean("value")).show()
 
     //reduceByKey API
-    val reduceCountByRDD = wordsPair.reduceByKey(_+_)
-    val reduceCountByDs = wordsPairDs.mapGroups((key,values) =>(key,values.length))
+    val reduceCountByRDD = wordsPair.reduceByKey(_ + _)
+    val reduceCountByDs = wordsPairDs.mapGroups((key, values) => (key, values.length))
 
     println(reduceCountByRDD.collect().toList)
     println(reduceCountByDs.collect().toList)
 
     //reduce function
-    val rddReduce = doubleRDD.reduce((a,b) => a +b)
-    val dsReduce = doubleDS.reduce((row1,row2) =>Row(row1.getDouble(0) + row2.getDouble(0)))
-    
-    println("rdd reduce is " +rddReduce +" dataset reduce "+dsReduce)
+    val rddReduce = doubleRDD.reduce((a, b) => a + b)
+    val dsReduce = doubleDS.reduce((row1, row2) => Row(row1.getDouble(0) + row2.getDouble(0)))
+
+    println("rdd reduce is " + rddReduce + " dataset reduce " + dsReduce)
 
   }
 
